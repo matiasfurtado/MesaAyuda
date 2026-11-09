@@ -9,13 +9,13 @@ formE1.addEventListener('submit', (event) => {
 	const formData = new FormData(formE1);
 	const data = Object.fromEntries(formData);
 	console.log('Application Server: Revisa el valor del form:');
-	console.log(data);
+	//console.log(data);
 
 	/*---
         Realiza validaciones en los datos del formulario antes de procesar
         */
 
-	if (data.id == '' || data.password == '') {
+	if (data.contacto == '' || data.password == '') {
 		console.log('debe indicar usuario');
 		document.getElementById('resultado1').style.color = 'RED';
 		document.getElementById('resultado1').style.textAlign = 'center';
@@ -24,7 +24,7 @@ formE1.addEventListener('submit', (event) => {
 		return;
 	}
 
-	if (data.id == 'pec') {   /*--Fix hecho por  Germán Lombardi IS1-2025 */
+	if (data.contacto == 'pec') {   /*--Fix hecho por  Germán Lombardi IS1-2025 */
 		console.log('pec no es bienvenido en éste sistema');
 		const m = '<li>El usuario <pec> no es bienvenido en éste sistema</li>';
 		document.getElementById('resultado2').style.color = 'RED';
@@ -58,6 +58,7 @@ formE1.addEventListener('submit', (event) => {
 
 	const RESTAPI = {
 		loginCliente: 'http://localhost:8080/api/loginCliente',
+		loginClienteEmail: 'http://localhost:8080/api/loginClienteEmail',
 		listarTicket: 'http://localhost:8080/api/listarTicket',
 	};
 
@@ -71,7 +72,7 @@ formE1.addEventListener('submit', (event) => {
         Crea estructuras para acceder a data del cliente
         */
 	    const login = {
-	        id: data.id,
+	        contacto: data.contacto,
 		    password: data.password
 		}	
 
@@ -85,11 +86,11 @@ formE1.addEventListener('submit', (event) => {
 
 
 
-	 	console.log('API REST:' + RESTAPI.loginCliente);
-	    console.log(login);
-	    console.log('login(' + JSON.stringify(login) + ')');
-	    console.log('options ' + JSON.stringify(options));
-    	var API = RESTAPI.loginCliente;
+	 	console.log('API REST:' + RESTAPI.loginClienteEmail);
+	    //console.log(login);
+	    //console.log('login(' + JSON.stringify(login) + ')');
+	    //console.log('options ' + JSON.stringify(options));
+    	var API = RESTAPI.loginClienteEmail;
 	    var APIoptions = options;
 
 	};
@@ -138,7 +139,7 @@ formE1.addEventListener('submit', (event) => {
 			console.log(
 				'Datos en respuesta del application server=' + JSON.stringify(users)
 			);
-			console.log('users.response=' + users.password);
+			console.log('users.response=' + users.response);
 			if (users.response == 'OK') {
 				//<==Habilitar esto para dejar que el API REST verifique sin exponer la password
 				console.log('La password es correcta');
@@ -171,17 +172,14 @@ formE1.addEventListener('submit', (event) => {
 						users.fecha_ultimo_ingreso +
 						'&mode=' + MODE
 				);
-				window.location.href =
-					systemURL.listarTicket +
-					'?id=' +
-					users.id +
-					'&contacto=' +
-					users.contacto +
-					'&nombre=' +
-					users.nombre +
-					'&fecha_ultimo_ingreso=' +
-					users.fecha_ultimo_ingreso +
-					'&mode=' + MODE;
+								const params = new URLSearchParams({
+					id: users.id,
+					contacto: users.contacto,
+					nombre: users.nombre,
+					fecha_ultimo_ingreso: users.fecha_ultimo_ingreso,
+					mode: MODE
+				});
+				window.location.href = systemURL.listarTicket + '?' + params.toString();
 			} else {
 				console.log('La password no es correcta');
 				document.getElementById('resultado1').style.color = 'RED'; /*--Fix hecho por  Germán Lombardi IS1-2025 */
@@ -189,4 +187,75 @@ formE1.addEventListener('submit', (event) => {
 					'Error de login, intente nuevamente';                  /*--Fix hecho por  Germán Lombardi IS1-2025 */
 			}
 		});
+});
+
+/*---
+    Punto 3 - Habilita o deshabilita el link "Registrate" según el correo tipeado ya exista o no
+    */
+
+const campoContacto = document.querySelector('input[name="contacto"]');
+const linkRegistro = document.getElementById('linkRegistro');
+let temporizador;
+
+function habilitarRegistro(habilitado) {
+	if (habilitado) {
+		linkRegistro.style.pointerEvents = 'auto';
+		linkRegistro.style.color = '';
+		linkRegistro.removeAttribute('aria-disabled');
+	} else {
+		linkRegistro.style.pointerEvents = 'none';
+		linkRegistro.style.color = 'gray';
+		linkRegistro.setAttribute('aria-disabled', 'true');
+	}
+}
+
+campoContacto.addEventListener('input', () => {
+	clearTimeout(temporizador);
+	const correo = campoContacto.value.trim();
+
+	if (!correo.includes('@')) {
+		habilitarRegistro(true);
+		return;
+	}
+
+	temporizador = setTimeout(() => {
+		fetch('http://localhost:8080/api/existeCliente', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ contacto: correo }),
+		})
+			.then((res) => res.json())
+			.then((r) => {
+				habilitarRegistro(!(r.response == 'OK' && r.existe));
+			})
+			.catch(() => habilitarRegistro(true));
+	}, 300);
+});
+
+linkRegistro.addEventListener('click', (event) => {
+	if (linkRegistro.getAttribute('aria-disabled') === 'true') {
+		event.preventDefault();
+		return;
+	}
+	const correo = campoContacto.value.trim();
+	if (correo != '') {
+		event.preventDefault();
+		window.location.href = 'registrarCliente.html?contacto=' + encodeURIComponent(correo);
+	}
+});
+
+
+/*---
+    Punto 5 - El link "¿Olvidaste tu contraseña?" lleva a la pantalla de cambio de password
+    con el correo ya tipeado (si lo hay)
+    */
+
+const linkOlvido = document.getElementById('linkOlvido');
+
+linkOlvido.addEventListener('click', (event) => {
+	const correo = campoContacto.value.trim();
+	if (correo != '') {
+		event.preventDefault();
+		window.location.href = 'resetPassword.html?contacto=' + encodeURIComponent(correo);
+	}
 });

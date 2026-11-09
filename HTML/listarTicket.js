@@ -27,8 +27,12 @@ console.log("id:"+query.id);
 console.log("contacto:"+query.contacto);
 console.log("ultima_fecha:"+query.fecha_ultimo_ingreso);
 console.log("mode:"+query.mode);
+console.log("nombre:"+query.nombre);
 
-document.getElementById("lastlogin").innerHTML = "<table><tr><td>Cliente</td><td>"+query.id+"</td></tr><tr><td>Contacto</td><td>"+query.contacto+"</td></tr></tr><tr><td>Ultimo ingreso</td><td>"+query.fecha_ultimo_ingreso+"</td></tr></table>";
+document.getElementById("datoCliente").textContent = query.contacto;
+document.getElementById("datoNombre").textContent = query.nombre;
+document.getElementById("datoId").textContent = query.id;
+document.getElementById("datoUltimoIngreso").textContent = query.fecha_ultimo_ingreso;
 
 
 const systemURL={ 
@@ -111,7 +115,7 @@ fetch(`${APIREST_URL}`,options)
     table.style.border="1px solid";
     table.style.backgroundColor="##626607";
 //ticket.uresponse.forEach((t)=> { 
-    ticket.data.forEach((t)=> { 
+    (ticket.data || []).forEach((t)=> { 
         console.log(t.clienteID)
         if (t.clienteID == query.id) {
             if (f==false) {

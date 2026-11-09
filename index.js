@@ -1,12 +1,12 @@
 
 /*-----------------------------------------------------------------------------------------------------------------
-  MesaAyuda.js debe copiarse al directorio del proyecto express como index.js
-
-  REST API 
-  UADER - IS1
-  Caso de estudio MesaAyuda
-
-  Dr. Pedro E. Colla 2023,2025
+//*  MesaAyuda.js debe copiarse al directorio del proyecto express como index.js
+//*
+//*  REST API 
+//*  UADER - FCyT - Ingenieria de Software I 
+//*  Caso de estudio MesaAyuda
+//*
+//*  Dr. Pedro E. Colla 2023,2025
  *----------------------------------------------------------------------------------------------------------------*/
 //AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE=1
 
@@ -31,7 +31,7 @@ import cors from 'cors';
 console.log("cors ok!");
 
 app.use(cors());
-console.log("cors ready!");
+console.log("CORS ready!");
 
 import AWS from 'aws-sdk'
 //var AWS = require('aws-sdk');
@@ -40,8 +40,10 @@ console.log("aws-sdk ready!");
 /*----
 Acquire critical security resources from an external file out of the path
 */
+
 //const accessKeyId = require('../accessKeyId.js');
 //const secretAccessKey = require('../secretAccessKey.js');
+
 import accessKeyId from '../accessKeyId.js';
 import secretAccessKey  from '../secretAccessKey.js';
 
@@ -56,6 +58,10 @@ AWS.config.update(awsConfig);
 console.log("Servidor listo!");
 let docClient = new AWS.DynamoDB.DocumentClient();
 
+/*----
+   Application server in LISTEN mode
+*/
+
 app.listen(
     PORT,
     () => console.log(`Servidor listo en http://localhost:${PORT}`)
@@ -63,10 +69,9 @@ app.listen(
 
 app.use(express.json());
 
-app.get('/api/cliente', (req,res) => {
-    res.status(200).send({response : "OK", message : "API Ready"});
-    console.log("API cliente: OK");
-});
+/*-------------------------------------------------------------------------------------------
+                            Funciones y Servicios
+ *-------------------------------------------------------------------------------------------*/
 
 /*-----------
 función para hacer el parse de un archivo JSON
@@ -76,40 +81,19 @@ function jsonParser(keyValue,stringValue) {
     var objectValue = JSON.parse(string);
     return objectValue[keyValue];
 }
-/*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
-/*                                                       API REST Cliente                                                            *
-/*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
 
+/*-------------------------------------------------------------------------------------------
+                            SERVER API 
+ *-------------------------------------------------------------------------------------------*/
+/*==*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*
+ *                       API REST Cliente                                                   *
+ *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*==*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 
-/*-----------
-  /api/getCliente
-  Esta API permite acceder a un cliente dado su id
-*/
-app.post('/api/getCliente/:id', (req,res) => {
-    const { id } = req.params;
-    console.log("getCliente: id("+id+")");
-    var params = {
-        TableName: "cliente",
-        Key: {
-            "id" : id
-            //test use "id": "0533a95d-7eef-4c6b-b753-1a41c9d1fbd0"   
-             }
-        };
-    docClient.get(params, function (err, data) {
-        if (err)  {
-            res.status(400).send(JSON.stringify({response : "ERROR", message : "DB access error "+ null}));
-        } else {
+app.get('/api/cliente', (req,res) => {
+    res.status(200).send({response : "OK", message : "API Ready"});
+    console.log("API cliente: OK");
+});
 
-            if (Object.keys(data).length != 0) {
-               res.status(200).send(JSON.stringify({"response":"OK","cliente" : data.Item}),null,2);
-            } else {
-               res.status(400).send(JSON.stringify({"response":"ERROR",message : "Cliente no existe"}),null,2);
-            }
-        }    
-    })
-
-
-} );
 
 /*---
   /api/loginCliente
@@ -168,6 +152,38 @@ app.post('/api/loginCliente', (req,res) => {
     getClienteByKey();
 
 });
+
+
+/*-----------
+  /api/getCliente
+  Esta API permite acceder a un cliente dado su id
+*/
+
+app.post('/api/getCliente/:id', (req,res) => {
+    const { id } = req.params;
+    console.log("getCliente: id("+id+")");
+    var params = {
+        TableName: "cliente",
+        Key: {
+            "id" : id
+            //test use "id": "0533a95d-7eef-4c6b-b753-1a41c9d1fbd0"   
+             }
+        };
+    docClient.get(params, function (err, data) {
+        if (err)  {
+            res.status(400).send(JSON.stringify({response : "ERROR", message : "DB access error "+ null}));
+        } else {
+
+            if (Object.keys(data).length != 0) {
+               res.status(200).send(JSON.stringify({"response":"OK","cliente" : data.Item}),null,2);
+            } else {
+               res.status(400).send(JSON.stringify({"response":"ERROR",message : "Cliente no existe"}),null,2);
+            }
+        }    
+    })
+
+
+} );
 
 /*---------
 Función para realizar el SCAN de un DB de cliente usando contacto como clave para la búsqueda (no es clave formal del DB)
@@ -430,15 +446,15 @@ async function scanDbTicket(clienteID) {
 */  
 app.post('/api/listarTicket', (req,res) => {
 
-    const {clienteID}  = req.body;
-    console.log("listarTicket: clienteID("+clienteID+")");
+    const {ID}  = req.body;
+    console.log("listarTicket: ID("+ID+")");
  
-    if (!clienteID) {
-        res.status(400).send({response : "ERROR" , message: "clienteID no informada"});
+    if (!ID) {
+        res.status(400).send({response : "ERROR" , message: "ID cliente  no informada"});
         return;
     }
 
-    scanDbTicket(clienteID)
+    scanDbTicket(ID)
     .then(resultDb => {
       if (Object.keys(resultDb).length == 0) {
         res.status(400).send({response : "ERROR" , message : "clienteID no tiene tickets"});

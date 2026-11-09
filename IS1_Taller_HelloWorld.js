@@ -15,6 +15,8 @@ const server = http.createServer(function (req, res) {
 
 // Cuando recibe un requerimiento escribe la respuesta
 res.write('Hello World')
+res.write('<html>')
+res.write('<body>')
 console.log("El servidor ha contestado exitosamente Hello World!");
 
 // Fin de la respuesta, cierra la conexión

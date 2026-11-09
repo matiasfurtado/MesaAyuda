@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!-- registrarCliente.html - Registro de nuevo cliente - Mesa de Ayuda -->
+<html Lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Registro de cliente</title>
+    <style type="text/css">
+        label { font-size: 18px; }
+        form { width: 500px; border: 1px solid black; }
+        input { margin: 7px; padding: 2px }
+        .form-label { margin-bottom: 0!important; }
+        .txt { display: inline-block; width: 80%; outline: none; margin: 0; }
+    </style>
+</head>
+
+<body>
+    <center><img src="HelpDeskGirl.png" alt="Nuestra imagen corporativa" style="width:200px;height:150px;"></center>
+    <center>
+        <h1>Sistema de Mesa de Ayuda</h1>
+        <h2>Registro de nuevo cliente</h2>
+    </center>
+
+    <center>
+    <form class="form" method="GET" style="background-color:#d8f7cf">
+        <br>
+        <table>
+            <tr><td><label class="form-label">E-mail</label></td></tr>
+            <tr><td><input class="txt" name="contacto" type="email" placeholder="Correo electrónico del cliente"><br></td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td><label class="form-label">Contraseña</label></td></tr>
+            <tr><td><input class="txt" name="password" type="password" placeholder="Elija una contraseña"><br></td></tr>
+            <tr>
+    <td><label class="form-label">Confirmar contraseña</label></td>
+</tr>
+<tr>
+    <td>
+        <input class="txt"
+               name="confirmarPassword"
+               type="password"
+               placeholder="Repita su contraseña"
+               required>
+    </td>
+</tr>
+            <tr><td><span id="resultado1"></span></td></tr>
+            <tr><td><br><input name="termscondition" type="checkbox"> Acepto los términos y condiciones del ingreso al sistema</td></tr>
+            <tr><td><span id="resultado2"></span></td></tr>
+            
+        </table>
+        <button type="submit">Registrarse</button>
+        <p><a href="loginClient.html">Volver al login</a></p>
+    </form>
+    </center>
+
+    <script src="registrarCliente.js" type="module"></script>
+    <div style="text-align: center; margin-top: 20px;">
+    <button type="button"
+        onclick="window.location.href='http://127.0.0.1:5500/MesaAyuda1/HTML/loginClient.html'">
+        Volver al inicio de sesión
+    </button>
+</div>
+</body>
+</html>
